@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income & Expenditure Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom styles for toast messages */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        .toast-warning {
+            background-color: #f39c12;
+        }
+
+        .toast-info {
+            background-color: #3498db;
+        }
+
+        .toast-success {
+            background-color: #2ecc71;
+        }
+
+        .toast.fade-out {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Simplified Card Styles */
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* Rounded corners using Tailwind's scale */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle shadow */
+            padding: 2rem;
+            border: 1px solid #e2e8f0; /* Tailwind's gray-200 */
+        }
+
+        /* Simplified Table Styles */
+        .table-container {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background-color: #f7fafc; /* Tailwind's gray-100 */
+            color: #718096; /* Tailwind's gray-600 */
+        }
+
+        .table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600; /* Tailwind's font-semibold */
+            text-transform: uppercase;
+            font-size: 0.875rem; /* Tailwind's text-sm */
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568; /* Tailwind's gray-700 */
+        }
+
+        .table tbody tr:hover {
+            background-color: #edf2f7; /* Tailwind's gray-200 */
+        }
+
+        /* Simplified Button Styles */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #4299e1; /* Tailwind's blue-500 */
+        }
+
+        .btn-primary:hover {
+            background-color: #3182ce; /* Tailwind's blue-600 */
+        }
+
+        .btn-success {
+            background-color: #48bb78; /* Tailwind's green-500 */
+        }
+
+        .btn-success:hover {
+            background-color: #38a169; /* Tailwind's green-600 */
+        }
+
+        .btn-danger {
+            background-color: #e53e3e;  /* Tailwind's red-600 */
+        }
+
+        .btn-danger:hover {
+             background-color: #c53030; /* Tailwind's red-700 */
+        }
+
+        .chart-container {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 font-inter">
+    <div class="container mx-auto py-8 px-4 mt-10">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
+            Income & Expenditure Tracker - 2081
+        </h1>
+
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="export-csv" class="btn btn-success">
+                <i class="ph-bold ph-file-csv mr-2"></i> Export CSV
+            </button>
+            <button id="print-page" class="btn btn-primary">
+                <i class="ph-bold ph-printer mr-2"></i> Print
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="ph-bold ph-wallet text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Total Income</h3>
+                        <h2 id="total-income" class="text-2xl font-bold text-green-800 mt-1" contenteditable="true">228700</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-red-100 text-red-600">
+                        <i class="ph-bold ph-money-bill-wave text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Total Expenditure</h3>
+                        <h2 id="total-expenditure" class="text-2xl font-bold text-red-800 mt-1" contenteditable="true">73485</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="ph-bold ph-chart-line text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Total Profit</h3>
+                        <h2 id="total-profit" class="text-2xl font-bold text-blue-800 mt-1">155215</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="ph-bold ph-coins"></i> Income Details
+                </h2>
+                <div class="table-container">
+                    <table id="income-table" class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Source</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td contenteditable="true">2025-03-01</td>
+                                <td contenteditable="true">Freelance Project</td>
+                                <td contenteditable="true">50000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button id="add-income-row" class="mt-4 btn btn-success">
+                    <i class="ph-bold ph-plus mr-2"></i> Add Income
+                </button>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="ph-bold ph-receipt"></i> Expense Details
+                </h2>
+                <div class="table-container">
+                    <table id="expense-table" class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Source</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td contenteditable="true">2025-03-02</td>
+                                <td contenteditable="true">Software Subscription</td>
+                                <td contenteditable="true">10000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button id="add-expense-row" class="mt-4 btn btn-danger">
+                    <i class="ph-bold ph-plus mr-2"></i> Add Expense
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="ph-bold ph-chart-bar"></i> Income vs Expenses Chart
+            </h2>
+            <div class="chart-container">
+                <canvas id="income-expense-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="ph-bold ph-chart-line"></i> Monthly Tracking
+            </h2>
+            <div class="chart-container">
+                <canvas id="tracking-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
+        }
+
+        document.getElementById('export-csv').addEventListener('click', () => {
+            showToast('CSV Export Coming Soon!', 'info');
+        });
+
+        document.getElementById('print-page').addEventListener('click', () => {
+            window.print();
+        });
+
+        function addRow(tableId) {
+            const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            for (let i = 0; i < 3; i++) {
+                const cell = newRow.insertCell(i);
+                cell.contentEditable = "true";
+                cell.innerText = "New Entry";
+                cell.className = "px-6 py-4";
+            }
+            showToast('New row added successfully!', 'success');
+        }
+
+        document.getElementById('add-income-row').addEventListener('click', () => addRow('income-table'));
+        document.getElementById('add-expense-row').addEventListener('click', () => addRow('expense-table'));
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const incomeData = [20000, 30000, 40000, 35000, 50000, 45000];
+            const expenseData = [10000, 15000, 20000, 18000, 22000, 25000];
+            const profit = parseInt(document.getElementById('total-profit').innerText);
+            const totalIncome = parseInt(document.getElementById('total-income').innerText);
+            const totalExpense = parseInt(document.getElementById('total-expenditure').innerText);
+
+            const ctx1 = document.getElementById("income-expense-chart").getContext("2d");
+            new Chart(ctx1, {
+                type: "bar",
+                data: {
+                    labels: ["Income", "Expenditure", "Profit"],
+                    datasets: [{
+                        label: "Amount",
+                        data: [totalIncome, totalExpense, profit],
+                        backgroundColor: [
+                            "#86ef7d",
+                            "#fca5a5",
+                            "#6ee7b7"
+                        ],
+                        borderColor: [
+                            "#86ef7d",
+                            "#fca5a5",
+                            "#6ee7b7"
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: false,
+                            text: 'Income vs Expenses',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return 'Rs ' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById("tracking-chart").getContext("2d");
+            new Chart(ctx2, {
+                type: "line",
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                    datasets: [{
+                        label: "Income",
+                        data: incomeData,
+                        borderColor: "#38bdf8",
+                        backgroundColor: "rgba(56, 189, 248, 0.2)",
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointBackgroundColor: "#38bdf8",
+                        pointBorderColor: "#fff",
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: "#38bdf8",
+                        pointHoverBorderColor: "#fff",
+                    }, {
+                        label: "Expenditure",
+                        data: expenseData,
+                        borderColor: "#f87171",
+                        backgroundColor: "rgba(248, 113, 113, 0.2)",
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointBackgroundColor: "#f87171",
+                        pointBorderColor: "#fff",
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: "#f87171",
+                        pointHoverBorderColor: "#fff",
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: false,
+                            text: 'Monthly Tracking',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return 'Rs ' + value;
+                                }
+                            },
+                            grid: {
+                                color: "rgba(0, 0, 0, 0.1)"
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
