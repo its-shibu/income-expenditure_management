@@ -8,3 +8,17 @@ class IncomeExpense(models.Model):
 
     def __str__(self):
         return f"{self.date} - {self.source} - {self.amount}"
+    
+
+
+class IncomeDetails(models.Model):
+        date = models.DateTimeField()
+        source_of_income = models.CharField(max_length=255)
+        amount = models.FloatField()
+        
+
+class ExpenditureDetails(models.Model):
+        date = models.DateTimeField()
+        source_of_expenditure = models.CharField(max_length=255)
+        amount = models.FloatField()
+        
