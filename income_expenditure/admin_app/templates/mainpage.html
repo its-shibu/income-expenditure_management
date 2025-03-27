@@ -17,6 +17,11 @@
         integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <!-- bootstrap css cdn link  -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+
 </head>
 
 <body class="bg-gray-100 font-inter">
@@ -42,7 +47,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-gray-700">Total Income</h3>
-                        <h2 id="total-income" class="text-2xl font-bold text-green-800 mt-1">228700</h2>
+                        <h2 id="total-income" class="text-2xl font-bold text-green-800 mt-1">{{total_income}}</h2>
                     </div>
                 </div>
             </div>
@@ -53,7 +58,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-gray-700">Total Expenditure</h3>
-                        <h2 id="total-expenditure" class="text-2xl font-bold text-red-800 mt-1">73485</h2>
+                        <h2 id="total-expenditure" class="text-2xl font-bold text-red-800 mt-1">{{total_expenses}}</h2>
                     </div>
                 </div>
             </div>
@@ -63,8 +68,8 @@
                         <i class="ph-bold ph-chart-line text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-700">Total Profit</h3>
-                        <h2 id="total-profit" class="text-2xl font-bold text-blue-800 mt-1">155215</h2>
+                        <h3 class="text-lg font-semibold text-gray-700">{{result}}</h3>
+                        <h2 id="total-profit" class="text-2xl font-bold text-blue-800 mt-1">{{values}}</h2>
                     </div>
                 </div>
             </div>
@@ -75,6 +80,15 @@
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <i class="ph-bold ph-coins"></i> Income Details
                 </h2>
+                <span>
+                    {% for msg in messages %}
+                    {% if 'income' in msg.tags %}
+                    <div class="alert alert-success">
+                        {{msg}}
+                    </div>
+                    {%endif%}
+                    {% endfor %}
+                </span>
                 <div class="table-container">
                     <table id="income-table" class="table">
                         <thead>
@@ -94,7 +108,8 @@
                                 <td>
                                     <a href="#"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
-                                    <a href="#"><i class="fa-solid fa-trash"></i></a>
+                                    <a onclick="return confirm('Are you sure want to delete this record ?')"
+                                        href="/dltincome/{{i.id}}/"><i class="fa-solid fa-trash"></i></a>
                                 </td>
                             </tr>
 
@@ -106,16 +121,23 @@
                         </tbody>
                     </table>
                 </div>
-                <a href="/addincome">
-                    <button id="add-income-row" class="mt-4 btn btn-success">
-                        <i class="ph-bold ph-plus mr-2"></i> Add Income
-                    </button>
-                </a>
+                <div class="text-right mt-4">
+                    <a href="/addincome">
+                        <button id="add-income-row" class="btn btn-success">
+                            <i class="ph-bold ph-plus mr-2"></i> Add Income
+                        </button>
+                    </a>
+                </div>
             </div>
             <div>
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <i class="ph-bold ph-receipt"></i> Expense Details
                 </h2>
+                {% for msg in messages %}
+                {% if 'expenditure' in msg.tags %}
+                <div class="alert alert-success">{{msg}}</div>
+                {% endif %}
+                {% endfor %}
                 <div class="table-container">
                     <table id="expense-table" class="table">
                         <thead>
@@ -131,23 +153,29 @@
                             <tr>
                                 <td>{{data.date}}</td>
                                 <td>{{data.source_of_expenditure}}</td>
-                                <td>{{data.date}}</td>
+                                <td>{{data.amount}}</td>
                                 <td>
                                     <a href="#"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
-                                    <a href="#"><i class="fa-solid fa-trash"></i></a>
+                                    <a onclick="return confirm('Are you sure to delte this data ?')" href="/dltexpenditure/{{data.id}}"><i class="fa-solid fa-trash"></i></a>
                                 </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No income records found.</td>
                             </tr>
 
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <a href="/addexpenditure">
-                    <button id="add-income-row" class="mt-4 btn btn-danger">
-                        <i class="ph-bold ph-plus mr-2"></i> Add Expenditure
-                    </button>
-                </a>
+                <div class="text-right mt-4">
+                    <a href="/addexpenditure">
+                        <button id="add-expenditure-row" class="btn btn-danger">
+                            <i class="ph-bold ph-plus mr-2"></i> Add Expenditure
+                        </button>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -170,7 +198,8 @@
         </div>
     </div>
 
-    <<script src="{% static 'js/script.js' %}"></script>>
+    <<script src="{% static 'js/script.js' %}">
+        </script>>
 </body>
 
 </html>

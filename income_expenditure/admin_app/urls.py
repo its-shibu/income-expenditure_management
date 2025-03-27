@@ -4,6 +4,9 @@ from . import views
 urlpatterns = [
     path('', views.frontpage),
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('addincome/', views.addIncome, name='add income'), 
-    path('addexpenditure/', views.addExpenditure, name='add expenditure')
+    path('addincome/', views.addIncome, name='add_income'), 
+    path('addexpenditure/', views.addExpenditure, name='add expenditure'),
+    path('dltincome/<int:income_id>/', views.delete_income, name='delete_income'),
+    path('dltexpenditure/<int:expenditure_id>/', views.delete_expenditure, name='delete_expenditure'),
+
 ]
