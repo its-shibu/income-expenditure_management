@@ -22,6 +22,7 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
 
+
 </head>
 
 <body class="bg-gray-100 font-inter">
@@ -54,7 +55,7 @@
             <div class="card">
                 <div class="flex items-center gap-4">
                     <div class="p-3 rounded-full bg-red-100 text-red-600">
-                        <i class="ph-bold ph-money-bill-wave text-2xl"></i>
+                        <i class="ph-bold ph-credit-card text-2xl"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-gray-700">Total Expenditure</h3>
@@ -106,7 +107,7 @@
                                 <td>{{ i.source_of_income }}</td>
                                 <td>{{ i.amount }}</td>
                                 <td>
-                                    <a href="#"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <a href="/editincome/{{i.id}}"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
                                     <a onclick="return confirm('Are you sure want to delete this record ?')"
                                         href="/dltincome/{{i.id}}/"><i class="fa-solid fa-trash"></i></a>
@@ -157,7 +158,8 @@
                                 <td>
                                     <a href="#"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
-                                    <a onclick="return confirm('Are you sure to delte this data ?')" href="/dltexpenditure/{{data.id}}"><i class="fa-solid fa-trash"></i></a>
+                                    <a onclick="return confirm('Are you sure to delte this data ?')"
+                                        href="/dltexpenditure/{{data.id}}"><i class="fa-solid fa-trash"></i></a>
                                 </td>
                             </tr>
                             {% empty %}
