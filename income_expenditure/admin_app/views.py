@@ -95,3 +95,37 @@ def edit_income(request, income_id):
     }
     return render(request, 'editincomedetails.html', context)
 
+
+
+
+
+def edit_expenditure(request, expenditure_id):
+    expenditure = ExpenditureDetails.objects.get(id = expenditure_id)
+    form = ExpenditureForm(instance=expenditure)
+    
+    # try:
+    #     # Fetch the expenditure object
+    #     expenditure = ExpenditureDetails.objects.get(id=expenditure_id)
+    # except ExpenditureDetails.DoesNotExist:
+    #     # Handle the case where the expenditure object doesn't exist
+    #     messages.add_message(request, messages.ERROR, 'Expenditure Details not found')
+    #     return redirect('/dashboard')
+
+    # Handle the GET and POST requests
+    if request.method == 'POST':
+        form = ExpenditureForm(request.POST, instance=expenditure)  # Update with POST data
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, 'Expenditure Details Updated Successfully')
+            return redirect('/dashboard')
+        else:
+            messages.add_message(request, messages.ERROR, 'Failed to Update Details')
+    else:
+        # For GET requests, pre-fill the form with the existing data
+        form = ExpenditureForm(instance=expenditure)
+
+    # Pass the form to the template
+    context = {
+        'form': form
+    }
+    return render(request, 'editexpendituredetails.html', context)
